@@ -111,9 +111,6 @@ var GenericGraphNode = Backbone.Model.extend({
 
         // preinit?
         _.map(toadd, function(el) { add(el) })
-        
-
-
     },
 
     plugget: function(plug) {
@@ -151,6 +148,42 @@ var GenericGraphNode = Backbone.Model.extend({
     }    
 });
 
+// GraphNode specializes GenericGraphNode by adding 'children' and 'parents' plugs
+var GraphNode = GenericGraphNode.extend4000({
+    initialize: function() {
+        var self = this;
+
+        this.addplug('parents','parent');
+        this.addplug('children','child');
+        
+        this.parents.on('add',function(obj) {
+            obj.addchild(self);
+        });
+
+        this.children.on('add',function(obj) {
+            obj.addparent(self);
+        });
+        
+
+        // in case the object was prefilled
+        this.children.map(function(child) {
+            child.addparent(self)
+        })
+
+        this.parents.map(function(child) {
+            child.addchild(self)
+        })
+
+    },
+
+    destroy: function() {
+        this.delparents()
+        this.delchildren()
+        this.trigger('destroy')
+    }
+});
+
+
 /*
 var EdgeGraphNode = GenericGraphNode.extend4000({
     initialize: function() {
@@ -169,31 +202,6 @@ var EdgeGraphNode = GenericGraphNode.extend4000({
     
 })
 */
-
-// GraphNode specializes GenericGraphNode by adding 'children' and 'parents' plugs
-var GraphNode = GenericGraphNode.extend4000({
-    initialize: function() {
-        var self = this;
-
-        this.addplug('parents','parent');
-        this.addplug('children','child');
-        
-        this.parents.on('add',function(obj) {
-            obj.addchild(self);
-        });
-
-        this.children.on('add',function(obj) {
-            obj.addparent(self);
-        });
-    },
-
-    destroy: function() {
-        this.delparents()
-        this.delchildren()
-        this.trigger('destroy')
-    }
-});
-
 
 
 exports.GenericGraphNode = GenericGraphNode
