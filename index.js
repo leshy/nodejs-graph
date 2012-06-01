@@ -99,16 +99,11 @@ var GenericGraphNode = Backbone.Model.extend({
         var add = this[ 'add' + plugsingular ] = decorate(decorators.multiArg,function(obj) { return self.plugadd.call(self,plugplural,obj); });
 
         this[ 'del' + plugsingular ] = decorate(decorators.multiArg,function(obj) { return self.plugremove.call(self,plugplural,obj); });
-
         this[ 'del' + plugplural ] = function() { return self.plugremoveall.call(self,plugplural) }
-
         this[ 'has' + plugsingular ] = function(obj) { return self.plughas.call(self,plugplural,obj); };
         this[ 'get' + plugsingular ] = function() { return _.first(self.plugget.call(self,plugplural)); };
         this[ 'get' + plugplural ] = function() { return self.plugget.call(self,plugplural); };
-
         this[ 'replace' + plugsingular ] = function(obj1,obj2) { return self.plugreplace.apply(self,[plugplural,obj1,obj2]); };
-
-        this[ plugsingular + "each" ] = function(callback) { return self.plugget.apply(self,[plugplural,callback]); };
 
         // you can preinitialize contents of the plug
         var toadd = (this.get(plugplural) || [])
