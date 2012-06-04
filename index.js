@@ -109,6 +109,8 @@ var GenericGraphNode = Backbone.Model.extend({
         var toadd = (this.get(plugplural) || [])
         this.unset(plugplural)
 
+        this.trigger('addplug:' + plugplural)
+
         // preinit?
         _.map(toadd, function(el) { add(el) })
     },
@@ -145,7 +147,7 @@ var GenericGraphNode = Backbone.Model.extend({
                 plug.add(obj2,{at:index})
             }
         })        
-    }    
+    }
 });
 
 // GraphNode specializes GenericGraphNode by adding 'children' and 'parents' plugs
@@ -184,6 +186,23 @@ var GraphNode = GenericGraphNode.extend4000({
 });
 
 
+var TraversalMixin = Backbone.Model.extend4000({
+    plugDepthFirst: function(plug,callback) {
+        
+        var ret = callback(this) 
+        if (ret) { return true } // a way to cancel the tranversal
+
+        var models = this[plug].models
+        for (index in models) {
+            var element = models[index]
+            var ret = element.plugDepthFirst(plug,callback)
+            if (ret) { break }
+        }
+
+    }
+})
+
+
 /*
 var EdgeGraphNode = GenericGraphNode.extend4000({
     initialize: function() {
@@ -206,3 +225,4 @@ var EdgeGraphNode = GenericGraphNode.extend4000({
 
 exports.GenericGraphNode = GenericGraphNode
 exports.GraphNode = GraphNode
+exports.TraversalMixin = TraversalMixin

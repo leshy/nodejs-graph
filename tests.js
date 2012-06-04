@@ -33,3 +33,28 @@ exports.replace = function(test){
     test.done()
 };
 
+
+
+exports.depthfirst = function(test){
+    var node = graph.GraphNode.extend4000(graph.TraversalMixin)
+
+    var a = new node({name: 'a'})
+    var b = new node({name: 'b'})
+    var c = new node({name: 'c'})
+    var d = new node({name: 'd'})
+    var e = new node({name: 'e'})
+    
+    a.addchild(b)
+    b.addchild(c)
+    b.addchild(d)
+    d.addchild(e)
+
+    var data = []
+    a.plugDepthFirst('children',function(element) { 
+        data.push(element.get('name'))
+    })
+
+    test.equals(JSON.stringify(data),'["a","b","c","d","e"]')
+    test.done()
+};
+
