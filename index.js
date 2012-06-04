@@ -92,9 +92,14 @@ var GenericGraphNode = Backbone.Model.extend({
     addplug: function(plugplural, plugsingular) {
         var self = this;
         if (!plugsingular) { plugsingular = plugplural; }
-        this.plugs[plugplural] = true;
+        
+        var plug
+        plug = this[ plugplural ] = new Backbone.Collection();
+        
+        plug.singular = plugsingular
+        plug.name = plugplural
 
-        this[ plugplural ] = new Backbone.Collection();
+        this.plugs[plugplural] = this[ plugplural ];
         
         var add = this[ 'add' + plugsingular ] = decorate(decorators.multiArg,function(obj) { return self.plugadd.call(self,plugplural,obj); });
 
@@ -109,7 +114,8 @@ var GenericGraphNode = Backbone.Model.extend({
         var toadd = (this.get(plugplural) || [])
         this.unset(plugplural)
 
-        this.trigger('addplug:' + plugplural)
+        this.trigger('addplug:' + plugplural,this[plugplural])
+        this.trigger('addplug', plugplural)
 
         // preinit?
         _.map(toadd, function(el) { add(el) })
@@ -188,7 +194,6 @@ var GraphNode = GenericGraphNode.extend4000({
 
 var TraversalMixin = Backbone.Model.extend4000({
     plugDepthFirst: function(plug,callback) {
-        
         var ret = callback(this) 
         if (ret) { return true } // a way to cancel the tranversal
 
@@ -198,6 +203,20 @@ var TraversalMixin = Backbone.Model.extend4000({
             var ret = element.plugDepthFirst(plug,callback)
             if (ret) { break }
         }
+    },
+
+
+    initialize: function() {
+
+        var buildFunctions = function(plug) {
+            this[plug.name + 'DepthFirst'] = function(callback) { this.plugDepthFirst(plug.name,callback) }
+        }
+        
+        // hook addplug
+        this.on('addplug', function(model,plug) { this.buildFunctions(plug)}.bind(this))
+
+        // build functions for existing plugs
+        _.map(this.plugs, buildFunctions.bind(this))
 
     }
 })

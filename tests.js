@@ -50,7 +50,7 @@ exports.depthfirst = function(test){
     d.addchild(e)
 
     var data = []
-    a.plugDepthFirst('children',function(element) { 
+    a.childrenDepthFirst(function(element) { 
         data.push(element.get('name'))
     })
 
