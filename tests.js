@@ -49,12 +49,11 @@ exports.depthfirst = function(test){
     b.addchild(d)
     d.addchild(e)
 
-    var data = []
-    a.childrenDepthFirst(function(element) { 
-        data.push(element.get('name'))
-    })
-
-    test.equals(JSON.stringify(data),'["a","b","c","d","e"]')
+    var reduce = a.childrenDepthFirst(function(element,reduce) { 
+        reduce[element.get('name')] = true
+        return reduce
+    }, {})
+    test.equals(JSON.stringify(reduce),'{"a":true,"b":true,"c":true,"d":true,"e":true}')
     test.done()
 };
 

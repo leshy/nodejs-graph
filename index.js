@@ -193,23 +193,29 @@ var GraphNode = GenericGraphNode.extend4000({
 
 
 var TraversalMixin = Backbone.Model.extend4000({
-    plugDepthFirst: function(plug,callback) {
-        var ret = callback(this) 
-        if (ret) { return true } // a way to cancel the tranversal
+    // this is actually a depthfirst reduce
+    plugDepthFirst: function(plug,callback,reducePacket) {
+
+        var reducePacket = callback(this,reducePacket) 
+        if (reducePacket === NaN) { return NaN } // a way to cancel the tranversal, this should be made differently
 
         var models = this[plug].models
+
         for (index in models) {
             var element = models[index]
-            var ret = element.plugDepthFirst(plug,callback)
-            if (ret) { break }
+            var reducePacket = element.plugDepthFirst(plug,callback,reducePacket)
+            if (reducePacket === NaN) { break }
         }
+        
+        return reducePacket
     },
-
+    
+    
 
     initialize: function() {
 
         var buildFunctions = function(plug) {
-            this[plug.name + 'DepthFirst'] = function(callback) { this.plugDepthFirst(plug.name,callback) }
+            this[plug.name + 'DepthFirst'] = function(callback,reducePacket) { return this.plugDepthFirst(plug.name,callback,reducePacket) }
         }
         
         // hook addplug
@@ -220,26 +226,6 @@ var TraversalMixin = Backbone.Model.extend4000({
 
     }
 })
-
-
-/*
-var EdgeGraphNode = GenericGraphNode.extend4000({
-    initialize: function() {
-        this.edges = {}
-    },
-
-    addplug: function(plugplural, plugsingular) {
-        var self = this;
-        GenericGraphNode.prototype.addplug(plugplural,plugsingular)
-        this.edges[plugplural] = {}
-        this[ 'add' + plugsingular ] = decorate(decorators.multiArg,function(obj) { return self.plugadd.call(self,plugplural,obj); });
-    },
-
-    plugadd: function(plug,obj,
-
-    
-})
-*/
 
 
 exports.GenericGraphNode = GenericGraphNode
