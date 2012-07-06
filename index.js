@@ -169,8 +169,23 @@ var GenericGraphNode = Backbone.Model.extend({
     }
 });
 
-// GraphNode specializes GenericGraphNode by adding 'children' and 'parents' plugs
 var GraphNode = GenericGraphNode.extend4000({
+    initialize: function() {
+        var self = this;
+        this.addplug('connections','connection');
+        this.connections.on('add',function(obj) { obj.addconnection(self); });
+        this.connections.on('remove',function(obj) { obj.delconnection(self); });
+        // in case the object was prefilled
+        this.connections.map(function(obj) { obj.addconnection(self) });
+
+        this.on('destroy',this.delconnections)
+    },
+
+    destroy: function () { this.trigger('destroy') }    
+})
+
+// GraphNode specializes GenericGraphNode by adding 'children' and 'parents' plugs
+var DirectedGraphNode = GenericGraphNode.extend4000({
     initialize: function() {
         var self = this;
 
@@ -181,17 +196,11 @@ var GraphNode = GenericGraphNode.extend4000({
             obj.addchild(self);
         });
 
-        this.parents.on('remove',function(obj) {
-            obj.delchild(self);
-        });
+        this.parents.on('remove',function(obj) { obj.delchild(self); });
 
-        this.children.on('add',function(obj) {
-            obj.addparent(self);
-        });
+        this.children.on('add',function(obj) { obj.addparent(self); });
 
-        this.children.on('remove',function(obj) {
-            obj.delparent(self);
-        });
+        this.children.on('remove',function(obj) { obj.delparent(self); });
 
         // in case the object was prefilled
         this.children.map(function(child) {
@@ -249,5 +258,6 @@ var TraversalMixin = Backbone.Model.extend4000({
 
 
 exports.GenericGraphNode = GenericGraphNode
+exports.DirectedGraphNode = DirectedGraphNode
 exports.GraphNode = GraphNode
 exports.TraversalMixin = TraversalMixin
