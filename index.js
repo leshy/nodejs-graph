@@ -61,12 +61,10 @@ var GenericGraphNode = Backbone.Model.extend({
         _.map(toadd, function(el) { add(el) })
     },
 
-    del: function() {
+    del: function() { 
         _.map(this.plugs,(function(plug,plugname) {
             this.plugremoveall(plugname)
         }.bind(this)))
-
-        this.trigger('del')
     },
 
     plugget: function(plug) {
@@ -74,7 +72,6 @@ var GenericGraphNode = Backbone.Model.extend({
     },
 
     plugadd: function(plug,obj) {
-//        if (!obj) { return }
         //console.log(this.get('name'), 'add', plug,obj.get('name'))
         if (!this.plughas(plug,obj)) { this[plug].add(obj); }
     },
@@ -125,6 +122,15 @@ var GraphNode = GenericGraphNode.extend4000({
         this.children.on('add',function(obj) {
             obj.addparent(self);
         });
+
+
+        this.parents.on('remove',function(obj) {
+            obj.delchild(self);
+        });
+
+        this.children.on('remove',function(obj) {
+            obj.delparent(self);
+        });
         
 
         // in case the object was prefilled
@@ -136,12 +142,6 @@ var GraphNode = GenericGraphNode.extend4000({
             child.addchild(self)
         })
 
-    },
-
-    destroy: function() {
-        this.delparents()
-        this.delchildren()
-        this.trigger('destroy')
     }
 });
 
